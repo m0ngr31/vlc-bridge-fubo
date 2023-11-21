@@ -10,6 +10,26 @@ import time, pprint
 user = os.environ.get("FUBO_USER")
 passwd = os.environ.get("FUBO_PASS")
 
+headers = {
+    'authority': 'api.fubo.tv',
+    'accept': '*/*',
+    'accept-language': 'en-US,en;q=0.9',
+    'content-type': 'application/json',
+    'origin': 'https://www.fubo.tv',
+    'referer': 'https://www.fubo.tv/',
+    'x-client-version': '4.75.0',
+    'x-device-app': 'android_tv',
+    'x-device-group': 'tenfoot',
+    'x-device-model': 'onn. 4K Streaming Box',
+    'x-device-platform': 'android_tv',
+    'x-device-type': 'puck',
+    'x-player-version': 'v1.34.0',
+    'x-preferred-language': 'en-US',
+    'x-supported-hdrmodes-list': 'hdr10,hlg',
+    'x-supported-streaming-protocols': 'hls',
+    'x-supported-codecs-list': 'vp9,avc,hevc',
+    'user-agent': 'fuboTV/4.75.0 (Linux;Android 12; onn. 4K Streaming Box Build/SGZ1.221127.063.A1.9885170) FuboPlayer/v1.34.0'
+}
 
 if user is None or passwd is None:
     sys.stderr.write("FUBO_USER and FUBO_PASS need to be set\n")
@@ -383,7 +403,7 @@ class Client:
                 if timeShift is not None:
                     # print(f"TimeShift Added for {j.get('name')} by {timeShift}" )
                     j.update({'timeShift': timeShift})
-                
+
             ch_list = self.stations
             # print(json.dumps(self.stations, indent=2, sort_keys=True))
             # print(len(self.stations))
@@ -394,7 +414,7 @@ class Client:
             token, error = self.token()
             if error:
                 return None, error
-            
+
             stream, error = self.api(f"v3/kgraph/v3/networks/{id}/stream")
             if error:
                 return None, error
@@ -421,28 +441,11 @@ class Client:
                 with open("fubo-device.json", "w") as f:
                     json.dump(self.device, f)
 
+            headers.update({'x-device-id': self.device})
+
     def token(self):
         if self.sessionID != "" and (time.time() - self.sessionAt) < 4 * 60 * 60:
             return self.sessionID, None
-        headers = {
-            'authority': 'api.fubo.tv',
-            'accept': '*/*',
-            'accept-language': 'en-US,en;q=0.9',
-            'content-type': 'application/json',
-            'origin': 'https://www.fubo.tv',
-            'referer': 'https://www.fubo.tv/',
-            'x-client-version': 'R20231116.1',
-            'x-device-app': 'web',
-            'x-device-group': 'desktop',
-            'x-device-id': self.device,
-            'x-device-model': 'Linux undefined Chrome 119.0.0.0',
-            'x-device-platform': 'desktop',
-            'x-device-type': 'desktop',
-            'x-player-version': 'npm:@fubotv/player-web@1.57.4',
-            'x-preferred-language': 'en-US',
-            'x-supported-codecs-list': 'avc',
-            'x-timezone-offset': '-420',
-        }
         data = {"email": self.user, "password" : self.passwd}
         # print('Call for sign-in')
         try:
@@ -468,25 +471,6 @@ class Client:
         if error:
             return None, error
 
-        headers = {
-            'authority': 'api.fubo.tv',
-            'accept': '*/*',
-            'accept-language': 'en-US,en;q=0.9',
-            'content-type': 'application/json',
-            'origin': 'https://www.fubo.tv',
-            'referer': 'https://www.fubo.tv/',
-            'x-client-version': 'R20231116.1',
-            'x-device-app': 'web',
-            'x-device-group': 'desktop',
-            'x-device-id': self.device,
-            'x-device-model': 'Linux undefined Chrome 119.0.0.0',
-            'x-device-platform': 'desktop',
-            'x-device-type': 'desktop',
-            'x-player-version': 'npm:@fubotv/player-web@1.57.4',
-            'x-preferred-language': 'en-US',
-            'x-supported-codecs-list': 'avc',
-            'x-timezone-offset': '-420',
-        }
         if token is not None:
             headers.update({'authorization': f'Bearer {token}'})
         # print(headers)
@@ -498,4 +482,3 @@ class Client:
         if response.status_code != 200:
             return None, f"HTTP failure {response.status_code}: {response.text}"
         return response.json(), None
-		
