@@ -6,7 +6,7 @@ from gevent.pywsgi import WSGIServer
 
 app = Flask("vlc-bridge")
 providers = {
-    fubo: importlib.import_module('fubo').Client(),
+    'fubo': importlib.import_module('fubo').Client(),
 }
 
 @app.get('/')
