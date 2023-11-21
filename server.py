@@ -5,9 +5,8 @@ from flask import Flask, request, redirect
 from gevent.pywsgi import WSGIServer
 
 app = Flask("vlc-bridge")
-name = os.environ['PROVIDER']
 providers = {
-    name: importlib.import_module(name).Client(),
+    fubo: importlib.import_module('fubo').Client(),
 }
 
 @app.get('/')
@@ -41,7 +40,7 @@ def playlist(provider):
             m3u += f" tvc-guide-stationid=\"{gracenoteId}\""
         else:
             # print(f"Using Fubo ID {s.get('id')} as StationID for {s.get('name')}" )
-            m3u += f" tvc-guide-stationid=\"{s.get('id')}\""            
+            m3u += f" tvc-guide-stationid=\"{s.get('id')}\""
 
         timeShift = s.get('timeShift')
         if timeShift is not None:
